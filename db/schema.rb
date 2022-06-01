@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_05_13_145010) do
+ActiveRecord::Schema.define(version: 2022_05_27_120826) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
@@ -116,7 +116,6 @@ ActiveRecord::Schema.define(version: 2022_05_13_145010) do
     t.integer "portal_id", null: false
     t.integer "category_id"
     t.integer "folder_id"
-    t.integer "author_id"
     t.string "title"
     t.text "description"
     t.text "content"
@@ -124,6 +123,8 @@ ActiveRecord::Schema.define(version: 2022_05_13_145010) do
     t.integer "views"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "author_id"
+    t.index ["author_id"], name: "index_articles_on_author_id"
   end
 
   create_table "attachments", id: :serial, force: :cascade do |t|
@@ -144,8 +145,8 @@ ActiveRecord::Schema.define(version: 2022_05_13_145010) do
     t.string "name", null: false
     t.text "description"
     t.string "event_name", null: false
-    t.jsonb "conditions", default: "{}", null: false
-    t.jsonb "actions", default: "{}", null: false
+    t.jsonb "conditions", default: "[]", null: false
+    t.jsonb "actions", default: "[]", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "active", default: true, null: false
@@ -193,8 +194,10 @@ ActiveRecord::Schema.define(version: 2022_05_13_145010) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "locale", default: "en"
+    t.string "slug"
     t.index ["locale", "account_id"], name: "index_categories_on_locale_and_account_id"
     t.index ["locale"], name: "index_categories_on_locale"
+    t.index ["slug", "locale"], name: "index_categories_on_slug_and_locale", unique: true
   end
 
   create_table "channel_api", force: :cascade do |t|
@@ -377,7 +380,7 @@ ActiveRecord::Schema.define(version: 2022_05_13_145010) do
     t.datetime "agent_last_seen_at"
     t.jsonb "additional_attributes", default: {}
     t.bigint "contact_inbox_id"
-    t.uuid "uuid", default: -> { "public.gen_random_uuid()" }, null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
     t.string "identifier"
     t.datetime "last_activity_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.bigint "team_id"
@@ -426,7 +429,7 @@ ActiveRecord::Schema.define(version: 2022_05_13_145010) do
     t.text "attribute_description"
     t.jsonb "attribute_values", default: []
     t.index ["account_id"], name: "index_custom_attribute_definitions_on_account_id"
-    t.index ["attribute_key", "attribute_model", "account_id"], name: "attribute_key_model_index", unique: true
+    t.index ["attribute_key", "attribute_model"], name: "attribute_key_model_index", unique: true
   end
 
   create_table "custom_filters", force: :cascade do |t|
@@ -767,6 +770,7 @@ ActiveRecord::Schema.define(version: 2022_05_13_145010) do
     t.jsonb "custom_attributes", default: {}
     t.string "type"
     t.text "message_signature"
+    t.boolean "email_digest_enabled", default: true
     t.index ["email"], name: "index_users_on_email"
     t.index ["pubsub_token"], name: "index_users_on_pubsub_token", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
@@ -805,6 +809,7 @@ ActiveRecord::Schema.define(version: 2022_05_13_145010) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "agent_bots", "accounts", on_delete: :cascade
+  add_foreign_key "articles", "users", column: "author_id"
   add_foreign_key "campaigns", "accounts", on_delete: :cascade
   add_foreign_key "campaigns", "inboxes", on_delete: :cascade
   add_foreign_key "contact_inboxes", "contacts", on_delete: :cascade
