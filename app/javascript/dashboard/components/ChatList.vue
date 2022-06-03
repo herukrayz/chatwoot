@@ -364,22 +364,22 @@ export default {
         this.resetAndFetchData();
       }
     },
-  },
-  unAssignedOpenCount(newValue, oldValue) {
-    if(oldValue < 1 && newValue > 0) {
-      if(!window.alarmBuffer){
-        fetchBuffer().then(audioBuffer => {
-          playAlarmOpenUnAssigned(audioBuffer);
-        })
-      }else {
-        playAlarmOpenUnAssigned(window.alarmBuffer);
+    unAssignedOpenCount(newValue, oldValue) {
+      if(oldValue < 1 && newValue > 0) {
+        if(!window.alarmBuffer){
+          fetchBuffer().then(audioBuffer => {
+            playAlarmOpenUnAssigned(audioBuffer);
+          })
+        }else {
+          playAlarmOpenUnAssigned(window.alarmBuffer);
+        }
       }
-    }
-    if(oldValue > 0 && newValue < 1) {
-      if(window.alarmSource){
-        stopAlarmOpenUnAssigned();
+      if(oldValue > 0 && newValue < 1) {
+        if(window.alarmSource){
+          stopAlarmOpenUnAssigned();
+        }
       }
-    }
+    },
   },
   mounted() {
     this.$store.dispatch('setChatFilter', this.activeStatus);
