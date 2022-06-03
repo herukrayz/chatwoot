@@ -152,6 +152,7 @@ import advancedFilterTypes from './widgets/conversation/advancedFilterItems';
 import filterQueryGenerator from '../helper/filterQueryGenerator.js';
 import AddCustomViews from 'dashboard/routes/dashboard/customviews/AddCustomViews';
 import DeleteCustomViews from 'dashboard/routes/dashboard/customviews/DeleteCustomViews.vue';
+import { fetchBuffer, playAlarmOpenUnAssigned, stopAlarmOpenUnAssigned } from '../../shared/helpers/AudioNotificationHelper';
 
 import {
   hasPressedAltAndJKey,
@@ -243,6 +244,12 @@ export default {
           count,
         };
       });
+    },
+    unAssignedOpenCount() {
+      return this.chatLists.filter(chat => chat.status === wootConstants.STATUS_TYPE.OPEN && !chat.meta.assignee).length
+    },
+    pendingCount() {
+      return this.chatLists.filter(chat => chat.status === wootConstants.STATUS_TYPE.PENDING).length
     },
     showAssigneeInConversationCard() {
       return (
@@ -358,9 +365,27 @@ export default {
       }
     },
   },
+  unAssignedOpenCount(newValue, oldValue) {
+    if(oldValue < 1 && newValue > 0) {
+      if(!window.alarmBuffer){
+        fetchBuffer().then(audioBuffer => {
+          playAlarmOpenUnAssigned(audioBuffer);
+        })
+      }else {
+        playAlarmOpenUnAssigned(window.alarmBuffer);
+      }
+    }
+    if(oldValue > 0 && newValue < 1) {
+      if(window.alarmSource){
+        stopAlarmOpenUnAssigned();
+      }
+    }
+  },
   mounted() {
     this.$store.dispatch('setChatFilter', this.activeStatus);
     this.resetAndFetchData();
+    window.alarmBuffer = null;
+    window.alarmSource = null;
 
     bus.$on('fetch_conversation_stats', () => {
       this.$store.dispatch('conversationStats/get', this.conversationFilters);

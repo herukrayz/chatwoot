@@ -55,7 +55,6 @@ export const shouldPlayAudio = (
   } = message;
   if (!isDocHidden && messageType === MESSAGE_TYPE.INCOMING) {
     showBadgeOnFavicon();
-    return false;
   }
   const isFromCurrentUser = userId === senderId;
 
@@ -109,4 +108,40 @@ export const playNewMessageNotificationInWidget = () => {
   IFrameHelper.sendMessage({
     event: 'playAudio',
   });
+};
+
+export const fetchBuffer = async (baseUrl = '', type = 'dashboard') => {
+  window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  return new Promise((resolve, reject) => {
+    try {
+      const resourceUrl = `${baseUrl}/audio/${type}/ring.ogg`;
+      const audioRequest = new Request(resourceUrl);
+
+      fetch(audioRequest)
+        .then(response => response.arrayBuffer())
+        .then(buffer => {
+          window.audioContext.decodeAudioData(buffer).then(audioBuffer => {
+            window.alarmBuffer = audioBuffer;
+            resolve(audioBuffer)
+          });
+        });
+    } catch (error) {
+      // error
+      reject(error)
+    }
+  })
+};
+
+export const playAlarmOpenUnAssigned = (audioBuffer) => {
+  let source = window.audioContext.createBufferSource();
+  source.buffer = audioBuffer;
+  source.connect(window.audioContext.destination);
+  source.loop = true;
+  window.alarmSource = source;
+  window.alarmSource.start(0);
+};
+
+export const stopAlarmOpenUnAssigned = () => {
+  window.alarmSource.stop(0);
 };

@@ -264,6 +264,14 @@ export default {
           snoozedUntil,
         })
         .then(() => {
+          if(status === this.STATUS_TYPE.RESOLVED) {
+            this.$store.dispatch('setCurrentChatAssignee', null);
+            this.$store
+              .dispatch('assignAgent', {
+                conversationId: this.currentChat.id,
+                agentId: 0,
+              })
+          }
           this.showAlert(this.$t('CONVERSATION.CHANGE_STATUS'));
           this.isLoading = false;
         });

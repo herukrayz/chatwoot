@@ -536,6 +536,9 @@ export default {
             'createPendingMessageAndSend',
             messagePayload
           );
+          if(!this.assignedAgent) {
+            this.onClickSelfAssign()
+          }
           bus.$emit(BUS_EVENTS.SCROLL_TO_MESSAGE);
         } catch (error) {
           const errorMessage =
