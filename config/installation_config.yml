@@ -7,7 +7,7 @@
 - name: LOGO
   value: '/brand-assets/logo.svg'
 - name: BRAND_URL
-  value: 'https://dewabiz.com/
+  value: 'https://dewabiz.com/'
 - name: WIDGET_BRAND_URL
   value: 'https://dewabiz.com/'
 - name: BRAND_NAME
